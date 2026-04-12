@@ -1,1 +1,15 @@
 Timestamp,EventType,Level,Item,Value1,Value2
+2026-04-12 11:21:50,Click_Position,1,,504,121
+2026-04-12 11:21:50,Interaction,1,Shop,,
+2026-04-12 11:21:51,Click_Position,1,,573,343
+2026-04-12 11:21:51,Interaction,1,Buy_cabbage_seed,,
+2026-04-12 11:21:53,Click_Position,1,,223,195
+2026-04-12 11:21:53,Interaction,1,Shop_Close,,
+2026-04-12 11:21:53,Click_Position,1,,592,388
+2026-04-12 11:21:53,Interaction,1,Field_cabbage,,
+2026-04-12 11:21:57,Click_Position,1,,630,430
+2026-04-12 11:21:57,Interaction,1,Field_cabbage,,
+2026-04-12 11:21:57,Harvest,1,cabbage,,
+2026-04-12 11:21:58,Click_Position,1,,776,140
+2026-04-12 11:21:58,Interaction,1,House,,
+2026-04-12 11:22:10,Level_Result,1,,7.74,SUCCESS
