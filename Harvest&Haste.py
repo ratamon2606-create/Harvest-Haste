@@ -628,6 +628,7 @@ class Game:
 
     def exit_game(self):
         self.tracker.save_to_csv()
+        pygame.display.quit()
         pygame.quit()
         self.show_dashboard()
         sys.exit()
@@ -663,20 +664,18 @@ class Game:
                                 self.tracker.log("Interaction", self.current_level, "Shop_Close")
                                 self.show_shop = False
                             elif data["type"] == "buy":
-                                if self.current_level == 1 and not self.tutorial_first_seed_bought and data["item"] != "cabbage_seed":
-                                    self.shop_msg = "Buy Cabbage Seed!"
-                                    self.shop_msg_timer = 3.0
-                                else:
-                                    self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
+                                if event.button == 1:
                                     if self.money >= data["price"]:
+                                        self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
                                         self.money -= data["price"]
                                         self.inventory[data["item"]] += 1
                                         if data["item"] == "cabbage_seed":
                                             self.tutorial_first_seed_bought = True
-                                        self.shop_msg = ""
-                                    else:
-                                        self.shop_msg = "Not enough money!"
-                                        self.shop_msg_timer = 3.0
+                                elif event.button == 3:
+                                    if self.inventory[data["item"]] > 0:
+                                        self.tracker.log("Interaction", self.current_level, f"Sell_{data['item']}")
+                                        self.inventory[data["item"]] -= 1
+                                        self.money += data["price"]
                 else:
                     if HITBOXES["shop"].collidepoint(pos):
                         self.tracker.log("Interaction", self.current_level, "Shop")
@@ -734,20 +733,22 @@ class Game:
                 self.internal_screen.blit(self.assets[f"icon_{item}"], (0, 0))
                 self.draw_text(self.inventory[item], TEXT_POS[item])
         self.draw_text(self.money, TEXT_POS["money"], color=(90, 50, 20))
+        
         if self.show_shop:
             self.internal_screen.blit(self.assets["shop_window"], (0, 0))
+            
             for key, data in SHOP_ITEMS.items():
                 if data["type"] == "buy":
                     x, y = data["text_pos"]
                     self.draw_text(data["name"], (x, y), color=(120, 80, 50))
                     self.draw_text(f"$ {data['price']}", (x, y + 25), color=(200, 0, 0))
             
-            if self.current_level == 1 and not self.tutorial_first_seed_bought:
-                self.draw_text("Tip: Buy a Cabbage Seed first!", (WIDTH//2 - 198, 585), color=(79, 94, 43))
+            self.draw_text("Left: buy", (WIDTH//2 + 45, 480), color=(119, 154, 104))
+            self.draw_text("Right: sell", (WIDTH//2 + 45, 518), color=(119, 154, 104))
                 
             if self.shop_msg_timer > 0:
                 self.shop_msg_timer -= dt
-                self.draw_text(self.shop_msg, (WIDTH//2, 500), color=(200, 0, 0))
+                self.draw_text(self.shop_msg, (WIDTH//2, 550), color=(200, 0, 0))
 
     def start_level_minigame(self, level, req_list):
         pygame.mouse.set_visible(False)
@@ -810,7 +811,17 @@ class Game:
                             for _ in range(qty_lost):
                                 self.tracker.log("Waste_Event", self.current_level, ing)
                                 
-                    self.money = self.level_start_money
+                    min_cost = 0
+                    for req_item, count in self.level_requirements[self.current_level].items():
+                        if req_item == "cabbage":
+                            min_cost += count * 5
+                        elif req_item == "rice":
+                            min_cost += count * 5
+                        elif req_item == "beef":
+                            min_cost += count * 20
+                            
+                    self.money = min_cost
+                    
                     self.game_state = "FARM"
                     pygame.mouse.set_visible(True)
                     self.tracker.save_to_csv()
@@ -1021,6 +1032,14 @@ class Game:
         canvas = FigureCanvasTkAgg(fig, master=root)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        def clean_quit():
+            plt.close()
+            root.quit()
+            root.destroy()
+            os._exit(0)
+
+        root.protocol("WM_DELETE_WINDOW", clean_quit)
 
         btn = tk.Button(root, text="Close & Exit", command=root.destroy, font=("Comic Sans MS", 14, "bold"), bg=P_TAN, fg=P_TEXT_BROWN, relief="ridge", borderwidth=4)
         btn.pack(pady=10)
