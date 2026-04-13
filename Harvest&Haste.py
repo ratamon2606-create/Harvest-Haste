@@ -58,10 +58,10 @@ HITBOXES = {
 
 SHOP_ITEMS = {
     "close_btn": {"rect": pygame.Rect(200, 190, 50, 50), "type": "close"},
-    "buy_rice":    {"rect": pygame.Rect(250, 245, 200, 60), "type": "buy", "item": "rice", "price": 20, "name": "Rice", "text_pos": (370, 245)},
-    "buy_cabbage": {"rect": pygame.Rect(250, 327, 200, 60), "type": "buy", "item": "cabbage", "price": 25, "name": "Cabbage", "text_pos": (370, 327)},
-    "buy_fish":    {"rect": pygame.Rect(250, 410, 200, 60), "type": "buy", "item": "fish", "price": 30, "name": "Fish", "text_pos": (370, 410)},
-    "buy_beef":    {"rect": pygame.Rect(250, 495, 200, 60), "type": "buy", "item": "beef", "price": 100, "name": "Beef", "text_pos": (370, 495)},
+    "buy_rice":    {"rect": pygame.Rect(250, 245, 200, 60), "type": "buy", "item": "rice", "price": 16, "name": "Rice", "text_pos": (370, 245)},
+    "buy_cabbage": {"rect": pygame.Rect(250, 327, 200, 60), "type": "buy", "item": "cabbage", "price": 10, "name": "Cabbage", "text_pos": (370, 327)},
+    "buy_fish":    {"rect": pygame.Rect(250, 410, 200, 60), "type": "buy", "item": "fish", "price": 24, "name": "Fish", "text_pos": (370, 410)},
+    "buy_beef":    {"rect": pygame.Rect(250, 495, 200, 60), "type": "buy", "item": "beef", "price": 40, "name": "Beef", "text_pos": (370, 495)},
     "buy_rice_seed": {"rect": pygame.Rect(530, 245, 200, 60), "type": "buy", "item": "rice_seed", "price": 5, "name": "Rice Seed", "text_pos": (650, 245)},
     "buy_cab_seed":  {"rect": pygame.Rect(530, 325, 200, 60), "type": "buy", "item": "cabbage_seed", "price": 5, "name": "Cab Seed", "text_pos": (650, 325)},
     "buy_cow":       {"rect": pygame.Rect(530, 405, 200, 60), "type": "buy", "item": "cow", "price": 20, "name": "Cow", "text_pos": (650, 405)},
@@ -220,7 +220,7 @@ class Animal(FarmEntity):
 
 
 class Crop(FarmEntity):
-    def __init__(self, hitbox, crop_type, empty_img_key, seed_bubble_key, harvest_bubble_key):
+    def __init__(self, hitbox, crop_type, empty_img_key, seed_bubble_key, harvest_bubble_key, grow_duration=3):
         super().__init__()
         self.waterLevel = 100 
         self.hitbox = hitbox
@@ -230,7 +230,7 @@ class Crop(FarmEntity):
         self.harvest_bubble_key = harvest_bubble_key 
         self.state = "EMPTY" 
         self.plant_time = 0
-        self.grow_duration = 3 
+        self.grow_duration = grow_duration 
         self.timeToProduce = self.grow_duration
 
     def waterCrop(self): self.waterLevel = 100
@@ -572,14 +572,18 @@ class Game:
             4: {"beef": 2, "rice": 2, "cabbage": 1}, 5: {"fish": 2, "cabbage": 2, "rice": 2, "beef": 2}
         }
         self.show_shop = False
+        self.tutorial_first_seed_bought = False
+        self.shop_msg = ""
+        self.shop_msg_timer = 0.0
         self.assets = {key: get_image(key) for key in IMAGE_PATHS}
         self.cow_sprite = get_image("cow_in_pen", (80, 80))
         self.wandering_cows = [] 
-        self.field_rice = Crop(HITBOXES["field_1"], "rice", "field_rice_empty", "bubble_seed", "bubble_harvest")
-        self.field_cabbage = Crop(HITBOXES["field_2"], "cabbage", "field_cabbage_empty", "bubble_cab_seed", "bubble_pick")
+        self.last_fish_time = time.time() 
+        self.cow_placed_time = 0
+        self.field_rice = Crop(HITBOXES["field_1"], "rice", "field_rice_empty", "bubble_seed", "bubble_harvest", 10)
+        self.field_cabbage = Crop(HITBOXES["field_2"], "cabbage", "field_cabbage_empty", "bubble_cab_seed", "bubble_pick", 5)
         self.fields = [self.field_rice, self.field_cabbage]
         self.cows_in_pen = 0
-        self.last_fish_time = time.time() 
 
     def play_music(self, track_name, loops=-1):
         if self.current_music != track_name:
@@ -659,10 +663,20 @@ class Game:
                                 self.tracker.log("Interaction", self.current_level, "Shop_Close")
                                 self.show_shop = False
                             elif data["type"] == "buy":
-                                self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
-                                if self.money >= data["price"]:
-                                    self.money -= data["price"]
-                                    self.inventory[data["item"]] += 1
+                                if self.current_level == 1 and not self.tutorial_first_seed_bought and data["item"] != "cabbage_seed":
+                                    self.shop_msg = "Buy Cabbage Seed!"
+                                    self.shop_msg_timer = 3.0
+                                else:
+                                    self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
+                                    if self.money >= data["price"]:
+                                        self.money -= data["price"]
+                                        self.inventory[data["item"]] += 1
+                                        if data["item"] == "cabbage_seed":
+                                            self.tutorial_first_seed_bought = True
+                                        self.shop_msg = ""
+                                    else:
+                                        self.shop_msg = "Not enough money!"
+                                        self.shop_msg_timer = 3.0
                 else:
                     if HITBOXES["shop"].collidepoint(pos):
                         self.tracker.log("Interaction", self.current_level, "Shop")
@@ -673,7 +687,7 @@ class Game:
                             self.start_level_minigame(self.current_level, list(current_reqs.keys()))
                     elif HITBOXES["pond"].collidepoint(pos):
                         self.tracker.log("Interaction", self.current_level, "Pond")
-                        if time.time() - self.last_fish_time > 2:
+                        if time.time() - self.last_fish_time > 15:
                             self.inventory["fish"] += 1
                             self.last_fish_time = time.time()
                     elif HITBOXES["cow_pen"].collidepoint(pos):
@@ -681,7 +695,8 @@ class Game:
                         if self.inventory["cow"] > 0 and self.cows_in_pen == 0:
                             self.inventory["cow"] -= 1; self.cows_in_pen += 1
                             self.wandering_cows.append(Animal(HITBOXES["cow_pen"]))
-                        elif self.cows_in_pen > 0:
+                            self.cow_placed_time = time.time()
+                        elif self.cows_in_pen > 0 and (time.time() - self.cow_placed_time >= 20):
                             self.cows_in_pen -= 1; self.inventory["beef"] += 1
                             if self.wandering_cows: self.wandering_cows.pop()
                     else:
@@ -705,10 +720,12 @@ class Game:
             for cow in self.wandering_cows:
                 cow.update(dt)
                 cow.draw(self.internal_screen, self.cow_sprite)
-            self.internal_screen.blit(self.assets["bubble_kill"], (0, 0))
+            if time.time() - self.cow_placed_time >= 20: 
+                self.internal_screen.blit(self.assets["bubble_kill"], (0, 0))
         else: self.internal_screen.blit(self.assets["bubble_cow"], (0, 0))
 
-        if time.time() - self.last_fish_time > 2: self.internal_screen.blit(self.assets["bubble_fishing"], (0, 0))
+        if time.time() - self.last_fish_time > 15: 
+            self.internal_screen.blit(self.assets["bubble_fishing"], (0, 0))
         self.internal_screen.blit(self.assets["inventory_bar"], (0, 0))
         self.internal_screen.blit(self.assets["money"], (0, 0)) 
         
@@ -724,24 +741,31 @@ class Game:
                     x, y = data["text_pos"]
                     self.draw_text(data["name"], (x, y), color=(120, 80, 50))
                     self.draw_text(f"$ {data['price']}", (x, y + 25), color=(200, 0, 0))
+            
+            if self.current_level == 1 and not self.tutorial_first_seed_bought:
+                self.draw_text("Tip: Buy a Cabbage Seed first!", (WIDTH//2 - 198, 585), color=(79, 94, 43))
+                
+            if self.shop_msg_timer > 0:
+                self.shop_msg_timer -= dt
+                self.draw_text(self.shop_msg, (WIDTH//2, 500), color=(200, 0, 0))
 
     def start_level_minigame(self, level, req_list):
         pygame.mouse.set_visible(False)
         if level == 1:
             recipe = [SlicingStep(4, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 10.0, ["bowl", "soup"], 50, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 10.0, ["bowl", "soup"], 35, req_list, self.tracker)
         elif level == 2:
             recipe = [SlicingStep(5, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(4, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 20.0, ["bowl", "steak"], 150, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 20.0, ["bowl", "steak"], 50, req_list, self.tracker)
         elif level == 3:
             recipe = [BoilingStep(5.0, "potrice"), SlicingStep(6, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(6, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish")]
-            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricefish"], 250, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricefish"], 65, req_list, self.tracker)
         elif level == 4:
             recipe = [BoilingStep(6.0, "potrice"), SlicingStep(6, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(6, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(5, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricebeef"], 350, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 35.0, ["bowl", "ricebeef"], 90, req_list, self.tracker)
         else: 
             recipe = [SlicingStep(8, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(8, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(6, "boardcabbage", "cutcabbage"), BoilingStep(6.0, "potrice"), SlicingStep(8, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef")]
-            self.minigame = MinigameManager(level, recipe, 35.0, ["bowl", "saucefish"], 500, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 40.0, ["bowl", "saucefish"], 200, req_list, self.tracker)
         self.game_state = "COOKING"
 
     def run_cooking_logic(self, dt):
