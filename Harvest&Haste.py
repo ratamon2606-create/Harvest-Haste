@@ -44,7 +44,8 @@ IMAGE_PATHS = {
     "rawfish": "asset/rawfish.png", "cookedfish": "asset/cookedfish.png", "burntfish": "asset/burntfish.png",
     "bowl": "asset/bowl.png", "soup": "asset/soup.png", "steak": "asset/steak.png",
     "ricefish": "asset/ricefish.png", "ricebeef": "asset/ricebeef.png", "saucefish": "asset/saucefish.png",
-    "success": "asset/success.png", "fail": "asset/fail.png", "return_btn": "asset/returnbutton.png"
+    "success": "asset/success.png", "fail": "asset/fail.png", "return_btn": "asset/returnbutton.png",
+    "title_bg": "asset/harvestnhaste.png" 
 }
 
 HITBOXES = {
@@ -561,7 +562,8 @@ class Game:
         try: self.font = pygame.font.Font("Dudu_Calligraphy.ttf", 30)  
         except: self.font = pygame.font.SysFont(None, 30) 
         self.tracker = DataTracker()
-        self.game_state = "FARM" 
+        self.game_state = "START_MENU" 
+        self.start_button_rect = pygame.Rect(WIDTH//2 - 100, HEIGHT - 150, 200, 60)
         self.minigame = None
         self.current_level = 1
         self.money = 5
@@ -609,8 +611,12 @@ class Game:
         while True:
             dt = self.clock.tick(FPS) / 1000.0
             
-            if self.game_state == "FARM": self.run_farm_logic(dt)
-            elif self.game_state == "COOKING": self.run_cooking_logic(dt)
+            if self.game_state == "START_MENU":
+                self.run_start_menu_logic(dt)
+            elif self.game_state == "FARM": 
+                self.run_farm_logic(dt)
+            elif self.game_state == "COOKING": 
+                self.run_cooking_logic(dt)
             
             win_w, win_h = self.window.get_size()
             scale = min(win_w / WIDTH, win_h / HEIGHT)
@@ -632,6 +638,31 @@ class Game:
         pygame.quit()
         self.show_dashboard()
         sys.exit()
+
+    def run_start_menu_logic(self, dt):
+        self.internal_screen.blit(self.assets["title_bg"], (0, 0))
+        
+        mouse_pos = pygame.mouse.get_pos()
+        scaled_mouse_pos = self.get_scaled_mouse_pos(mouse_pos)
+        
+        btn_color = (210, 180, 140) 
+        if self.start_button_rect.collidepoint(scaled_mouse_pos):
+            btn_color = (230, 200, 160) 
+            
+        pygame.draw.rect(self.internal_screen, btn_color, self.start_button_rect, border_radius=15)
+        pygame.draw.rect(self.internal_screen, (62, 39, 35), self.start_button_rect, width=4, border_radius=15)
+        
+        txt_surf = self.font.render("START GAME", True, (62, 39, 35))
+        txt_rect = txt_surf.get_rect(center=self.start_button_rect.center)
+        self.internal_screen.blit(txt_surf, txt_rect)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.exit_game()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if self.start_button_rect.collidepoint(scaled_mouse_pos):
+                    self.tracker.log("Interaction", self.current_level, "Start_Game")
+                    self.game_state = "FARM" 
 
     def run_farm_logic(self, dt):
         self.play_music("farm")
@@ -1027,21 +1058,22 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Interactions", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
 
-        plt.tight_layout(rect=[0.02, 0.05, 0.98, 0.92], w_pad=2.5, h_pad=2.5)
+        plt.tight_layout(pad=3.0)
+        fig.subplots_adjust(top=0.90)
 
         canvas = FigureCanvasTkAgg(fig, master=root)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         def clean_quit():
-            plt.close()
+            plt.close('all')
             root.quit()
             root.destroy()
             os._exit(0)
 
         root.protocol("WM_DELETE_WINDOW", clean_quit)
 
-        btn = tk.Button(root, text="Close & Exit", command=root.destroy, font=("Comic Sans MS", 14, "bold"), bg=P_TAN, fg=P_TEXT_BROWN, relief="ridge", borderwidth=4)
+        btn = tk.Button(root, text="Close & Exit", command=clean_quit, font=("Comic Sans MS", 14, "bold"), bg=P_TAN, fg=P_TEXT_BROWN, relief="ridge", borderwidth=4)
         btn.pack(pady=10)
 
         root.mainloop()
