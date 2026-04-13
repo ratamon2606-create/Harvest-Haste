@@ -2114,3 +2114,5 @@ Timestamp,EventType,Level,Item,Value1,Value2
 2026-04-13 17:03:18,Click_Position,1,,811,113
 2026-04-13 17:03:18,Interaction,1,House,,
 2026-04-13 17:03:29,Level_Result,1,,7.53,SUCCESS
+2026-04-13 17:13:21,Interaction,1,Start_Game,,
+2026-04-13 17:17:26,Interaction,1,Start_Game,,
