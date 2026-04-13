@@ -69,9 +69,9 @@ SHOP_ITEMS = {
 }
 
 TEXT_POS = {
-    "rice": (125, 678), "cabbage": (175, 678), "fish": (247, 678),         
-    "rice_seed": (315, 678), "cabbage_seed": (385, 678), 
-    "beef": (455, 678), "cow": (525, 678), "money": (735, 645)         
+    "rice": (125, 678), "cabbage": (183, 678), "fish": (250, 678),         
+    "rice_seed": (312, 678), "cabbage_seed": (382, 678), 
+    "beef": (450, 678), "cow": (510, 678), "money": (735, 645)         
 }
 
 SIGN_TEXT_X = 153
