@@ -981,15 +981,19 @@ class Game:
             
 
         ax = axes[1, 0]
-        style_cute_ax(ax, "Player Click Heatmap")
+        style_cute_ax(ax, "Click Distribution (2D Bin)")
         clicks = df[df["EventType"] == "Click_Position"].copy()
         if not clicks.empty:
             clicks["Value1"] = pd.to_numeric(clicks["Value1"])
             clicks["Value2"] = pd.to_numeric(clicks["Value2"])
             mask = (clicks["Value1"] < 1024) & (clicks["Value2"] < 720)
-            ax.scatter(clicks[mask]["Value1"], clicks[mask]["Value2"], alpha=0.5, c=P_TERRACOTTA, s=30, edgecolor=P_TEXT_BROWN, linewidth=1)
+            
+            h = ax.hist2d(clicks[mask]["Value1"], clicks[mask]["Value2"], 
+                          bins=[20, 15], range=[[0, 1024], [0, 720]], 
+                          cmap='Oranges')
+            
             ax.set_xlim(0, 1024)
-            ax.set_ylim(720, 0) 
+            ax.set_ylim(720, 0)
             ax.set_xlabel("X Coordinate", color=P_TEXT_BROWN, fontweight='bold')
             ax.set_ylabel("Y Coordinate", color=P_TEXT_BROWN, fontweight='bold')
         else:
