@@ -2,7 +2,7 @@
 
 ## Project Description
 
-- **Project by:** _(your name)_
+- **Project by:** Paritchaya Thongthep
 - **Game Genre:** Farming Simulator, Cooking Minigame
 
 Harvest & Haste is a cozy farming + cooking game where you grow crops, raise cows, fish in a pond, and then race to cook dishes under a ticking timer across five increasingly difficult recipes. The game quietly logs everything you do and, when you're done, pops open a dashboard with six charts showing exactly how your session played out from average level times to a heatmap of every single click.
@@ -110,5 +110,9 @@ Acknowledgements:
 1. Pygame [pygame.org](https://www.pygame.org) game engine
 2. Matplotlib [matplotlib.org](https://matplotlib.org) data visualizations
 3. Pandas [pandas.pydata.org](https://pandas.pydata.org) CSV parsing and aggregation
-4. Dudu Calligraphy [dafont.com] (https://www.dafont.com/dudu-calligraphy.font) Adderou. main font used
-5. 
+4. Dudu Calligraphy [dafont.com] (https://www.dafont.com/dudu-calligraphy.font) Adderou. main UI font
+5. success 1 [pixabay.com] (https://pixabay.com/sound-effects/film-special-effects-success-1-6297/) Leszek_Szary. success sound effect
+6. fail [pixabay.com] (https://pixabay.com/sound-effects/film-special-effects-fail-234710/) u_8g40a9z0la. fail sound effect
+7. Slow Cinematic Clock Ticking [pixabay.com] (https://pixabay.com/sound-effects/film-special-effects-slow-cinematic-clock-ticking-405471/) DRAGON-STUDIO. ticking sound effect in kitchen
+8. Cat Bag [pixabay.com] (https://pixabay.com/th/music/%e0%b9%80%e0%b8%9e%e0%b8%a5%e0%b8%87%e0%b9%80%e0%b8%94%e0%b8%81%e0%b8%a1%e0%b8%84%e0%b8%a7%e0%b8%b2%e0%b8%a1%e0%b8%aa%e0%b8%82-cat-bag-382798/) ChillRightsMusic. background music for starting page
+9. Playful Mood [chosic.com] (https://www.chosic.com/download-audio/59085/) MaxkoMusic. background music for farming
