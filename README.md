@@ -13,7 +13,7 @@ Harvest & Haste is a cozy farming + cooking game where you grow crops, raise cow
 
 To clone this project:
 ```sh
-git clone https://github.com/<username>/Harvest-Haste.git
+git clone https://github.com/paritchaya-ship-it/Harvest-Haste.git
 cd Harvest-Haste
 ```
 
