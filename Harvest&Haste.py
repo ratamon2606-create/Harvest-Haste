@@ -12,16 +12,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 
+# Hide font warnings in terminal
 logging.getLogger('matplotlib.font_manager').disabled = True
 
+# Turn on Pygame and Audio Engine
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
 pygame.mixer.init()
 
-
+# --- CONFIGURATION ---
 WIDTH, HEIGHT = 1024, 720
 FPS = 60
 
+# --- IMAGE FILENAMES ---
 IMAGE_PATHS = {
     "background": "asset/bg.png", "shop_building": "asset/shop.png", "house_building": "asset/house.png",
     "pond": "asset/pond.png", "fence": "asset/fence.png", "sign": "asset/sign.png", 
@@ -44,10 +47,10 @@ IMAGE_PATHS = {
     "rawfish": "asset/rawfish.png", "cookedfish": "asset/cookedfish.png", "burntfish": "asset/burntfish.png",
     "bowl": "asset/bowl.png", "soup": "asset/soup.png", "steak": "asset/steak.png",
     "ricefish": "asset/ricefish.png", "ricebeef": "asset/ricebeef.png", "saucefish": "asset/saucefish.png",
-    "success": "asset/success.png", "fail": "asset/fail.png", "return_btn": "asset/returnbutton.png",
-    "title_bg": "asset/harvestnhaste.png" 
+    "success": "asset/success.png", "fail": "asset/fail.png", "return_btn": "asset/returnbutton.png"
 }
 
+# --- HITBOXES ---
 HITBOXES = {
     "shop": pygame.Rect(400, 50, 150, 120),    
     "house": pygame.Rect(650, 20, 250, 200),   
@@ -57,21 +60,22 @@ HITBOXES = {
     "pond": pygame.Rect(60, 400, 220, 220),     
 }
 
+# --- SHOP DATA ---
 SHOP_ITEMS = {
     "close_btn": {"rect": pygame.Rect(200, 190, 50, 50), "type": "close"},
-    "buy_rice":    {"rect": pygame.Rect(250, 245, 200, 60), "type": "buy", "item": "rice", "price": 16, "name": "Rice", "text_pos": (370, 245)},
-    "buy_cabbage": {"rect": pygame.Rect(250, 327, 200, 60), "type": "buy", "item": "cabbage", "price": 10, "name": "Cabbage", "text_pos": (370, 327)},
-    "buy_fish":    {"rect": pygame.Rect(250, 410, 200, 60), "type": "buy", "item": "fish", "price": 24, "name": "Fish", "text_pos": (370, 410)},
-    "buy_beef":    {"rect": pygame.Rect(250, 495, 200, 60), "type": "buy", "item": "beef", "price": 40, "name": "Beef", "text_pos": (370, 495)},
+    "buy_rice":    {"rect": pygame.Rect(250, 245, 200, 60), "type": "buy", "item": "rice", "price": 20, "name": "Rice", "text_pos": (370, 245)},
+    "buy_cabbage": {"rect": pygame.Rect(250, 327, 200, 60), "type": "buy", "item": "cabbage", "price": 25, "name": "Cabbage", "text_pos": (370, 327)},
+    "buy_fish":    {"rect": pygame.Rect(250, 410, 200, 60), "type": "buy", "item": "fish", "price": 30, "name": "Fish", "text_pos": (370, 410)},
+    "buy_beef":    {"rect": pygame.Rect(250, 495, 200, 60), "type": "buy", "item": "beef", "price": 100, "name": "Beef", "text_pos": (370, 495)},
     "buy_rice_seed": {"rect": pygame.Rect(530, 245, 200, 60), "type": "buy", "item": "rice_seed", "price": 5, "name": "Rice Seed", "text_pos": (650, 245)},
     "buy_cab_seed":  {"rect": pygame.Rect(530, 325, 200, 60), "type": "buy", "item": "cabbage_seed", "price": 5, "name": "Cab Seed", "text_pos": (650, 325)},
     "buy_cow":       {"rect": pygame.Rect(530, 405, 200, 60), "type": "buy", "item": "cow", "price": 20, "name": "Cow", "text_pos": (650, 405)},
 }
 
 TEXT_POS = {
-    "rice": (125, 678), "cabbage": (183, 678), "fish": (250, 678),         
-    "rice_seed": (312, 678), "cabbage_seed": (382, 678), 
-    "beef": (450, 678), "cow": (510, 678), "money": (735, 645)         
+    "rice": (125, 678), "cabbage": (175, 678), "fish": (247, 678),         
+    "rice_seed": (315, 678), "cabbage_seed": (385, 678), 
+    "beef": (455, 678), "cow": (525, 678), "money": (735, 645)         
 }
 
 SIGN_TEXT_X = 153
@@ -89,7 +93,9 @@ def get_image(key, size=None):
         surf.fill((150, 150, 150, 128))
         return surf
 
-
+# ==========================================
+# ANALYTICS TRACKER
+# ==========================================
 class DataTracker:
     def __init__(self):
         self.main_file = "all_gameplay_stats.csv"        
@@ -116,7 +122,9 @@ class DataTracker:
             csv.writer(f).writerows(self.records)
         self.records = [] 
 
-
+# ==========================================
+# BASE CLASSES & STRUCTURES
+# ==========================================
 class FarmEntity:
     def __init__(self):
         self.growthState = "EMPTY"
@@ -169,7 +177,9 @@ class OrderManager:
     def generateOrder(self): pass
     def checkDishCompletion(self): pass
 
-
+# ==========================================
+# GAME MODULES
+# ==========================================
 class Animal(FarmEntity):
     def __init__(self, bounds_rect):
         super().__init__()
@@ -221,7 +231,7 @@ class Animal(FarmEntity):
 
 
 class Crop(FarmEntity):
-    def __init__(self, hitbox, crop_type, empty_img_key, seed_bubble_key, harvest_bubble_key, grow_duration=3):
+    def __init__(self, hitbox, crop_type, empty_img_key, seed_bubble_key, harvest_bubble_key):
         super().__init__()
         self.waterLevel = 100 
         self.hitbox = hitbox
@@ -231,7 +241,7 @@ class Crop(FarmEntity):
         self.harvest_bubble_key = harvest_bubble_key 
         self.state = "EMPTY" 
         self.plant_time = 0
-        self.grow_duration = grow_duration 
+        self.grow_duration = 3 
         self.timeToProduce = self.grow_duration
 
     def waterCrop(self): self.waterLevel = 100
@@ -279,19 +289,19 @@ class SlicingStep(CuttingBoard):
             self.knife_sprite = get_image("knife") 
         self.completed = False
         self.completion_timer = 0.5 
-        self.tilt_timer = 0.0
+        self.tilt_timer = 0.0 # NEW: Tracks how long the knife should stay tilted
 
     def chop(self):
         if not self.completed:
             self.current_swipes += 1
-            self.tilt_timer = 0.1
+            self.tilt_timer = 0.1 # NEW: Tilt the knife for 0.15 seconds
             if self.current_swipes >= self.target_swipes:
                 self.completed = True
                 self.currentItem.currentState = "Chopped"
 
     def update(self, dt):
         if self.tilt_timer > 0:
-            self.tilt_timer -= dt
+            self.tilt_timer -= dt # NEW: countdown the tilt
         if self.completed: self.completion_timer -= dt
 
     def handle_event(self, event):
@@ -305,6 +315,8 @@ class SlicingStep(CuttingBoard):
             screen.blit(self.start_sprite, (0, 0))
             if mouse_pos is None: mouse_pos = pygame.mouse.get_pos()
             
+            # --- NEW TILT LOGIC ---
+            # If tilt_timer > 0, rotate knife -30 degrees (tilt down), otherwise 0 (straight up)
             angle = 40 if self.tilt_timer > 0 else 0
             rotated_knife = pygame.transform.rotate(self.knife_sprite, angle)
             knife_rect = rotated_knife.get_rect()
@@ -331,16 +343,18 @@ class BoilingStep(Stove):
         self.ingredient_sprite = get_image(ingredient_img_key) if ingredient_img_key else None
         self.spatula_sprite = get_image("potspatula") 
         
+        # NEW RANDOM DRIFT VARIABLES
         self.drift_direction = random.choice([-1, 1])
         self.drift_timer = random.uniform(0.5, 1.5)
         self.drift_speed = random.uniform(20.0, 40.0)
 
     def boilOrFry(self, dt):
+        # NEW: Randomly drift the gauge left or right!
         self.drift_timer -= dt
         if self.drift_timer <= 0:
-            self.drift_direction = random.choice([-1, 1])
-            self.drift_timer = random.uniform(0.5, 1.5)
-            self.drift_speed = random.uniform(20.0, 40.0)
+            self.drift_direction = random.choice([-1, 1]) # randomly pick left or right
+            self.drift_timer = random.uniform(0.5, 1.5) # keep that direction for 0.5 to 1.5 secs
+            self.drift_speed = random.uniform(20.0, 40.0) # pick a new speed
 
         self.heat_level += self.drift_direction * self.drift_speed * dt
         self.heat_level = max(0, min(100, self.heat_level))
@@ -549,21 +563,23 @@ class MinigameManager(OrderManager):
             penalty_txt = font.render(f"Lost: {lost_text}", True, (200, 0, 0))
             screen.blit(penalty_txt, (WIDTH//2 - penalty_txt.get_width()//2, HEIGHT//2 + 30))
 
-
+# ==========================================
+# MAIN GAME
+# ==========================================
 class Game:
     def __init__(self):
         self.window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         self.internal_screen = pygame.Surface((WIDTH, HEIGHT))
         pygame.display.set_caption("Harvest & Haste")
         
+        # --- MUSIC SETUP ---
         self.current_music = None 
         
         self.clock = pygame.time.Clock()
         try: self.font = pygame.font.Font("Dudu_Calligraphy.ttf", 30)  
         except: self.font = pygame.font.SysFont(None, 30) 
         self.tracker = DataTracker()
-        self.game_state = "START_MENU" 
-        self.start_button_rect = pygame.Rect(WIDTH//2 - 100, HEIGHT - 150, 200, 60)
+        self.game_state = "FARM" 
         self.minigame = None
         self.current_level = 1
         self.money = 5
@@ -574,18 +590,14 @@ class Game:
             4: {"beef": 2, "rice": 2, "cabbage": 1}, 5: {"fish": 2, "cabbage": 2, "rice": 2, "beef": 2}
         }
         self.show_shop = False
-        self.tutorial_first_seed_bought = False
-        self.shop_msg = ""
-        self.shop_msg_timer = 0.0
         self.assets = {key: get_image(key) for key in IMAGE_PATHS}
         self.cow_sprite = get_image("cow_in_pen", (80, 80))
         self.wandering_cows = [] 
-        self.last_fish_time = time.time() 
-        self.cow_placed_time = 0
-        self.field_rice = Crop(HITBOXES["field_1"], "rice", "field_rice_empty", "bubble_seed", "bubble_harvest", 10)
-        self.field_cabbage = Crop(HITBOXES["field_2"], "cabbage", "field_cabbage_empty", "bubble_cab_seed", "bubble_pick", 5)
+        self.field_rice = Crop(HITBOXES["field_1"], "rice", "field_rice_empty", "bubble_seed", "bubble_harvest")
+        self.field_cabbage = Crop(HITBOXES["field_2"], "cabbage", "field_cabbage_empty", "bubble_cab_seed", "bubble_pick")
         self.fields = [self.field_rice, self.field_cabbage]
         self.cows_in_pen = 0
+        self.last_fish_time = time.time() 
 
     def play_music(self, track_name, loops=-1):
         if self.current_music != track_name:
@@ -594,7 +606,7 @@ class Game:
                 pygame.mixer.music.load(f"asset/{track_name}.mp3")
                 pygame.mixer.music.play(loops)
             except Exception as e:
-                pass
+                pass # Silent ignore for robustness
 
     def get_scaled_mouse_pos(self, raw_pos):
         win_w, win_h = self.window.get_size()
@@ -611,12 +623,8 @@ class Game:
         while True:
             dt = self.clock.tick(FPS) / 1000.0
             
-            if self.game_state == "START_MENU":
-                self.run_start_menu_logic(dt)
-            elif self.game_state == "FARM": 
-                self.run_farm_logic(dt)
-            elif self.game_state == "COOKING": 
-                self.run_cooking_logic(dt)
+            if self.game_state == "FARM": self.run_farm_logic(dt)
+            elif self.game_state == "COOKING": self.run_cooking_logic(dt)
             
             win_w, win_h = self.window.get_size()
             scale = min(win_w / WIDTH, win_h / HEIGHT)
@@ -634,37 +642,9 @@ class Game:
 
     def exit_game(self):
         self.tracker.save_to_csv()
-        pygame.display.quit()
         pygame.quit()
         self.show_dashboard()
         sys.exit()
-
-    def run_start_menu_logic(self, dt):
-        self.play_music("start") 
-        
-        self.internal_screen.blit(self.assets["title_bg"], (0, 0))
-        
-        mouse_pos = pygame.mouse.get_pos()
-        scaled_mouse_pos = self.get_scaled_mouse_pos(mouse_pos)
-        
-        btn_color = (210, 180, 140) 
-        if self.start_button_rect.collidepoint(scaled_mouse_pos):
-            btn_color = (230, 200, 160) 
-            
-        pygame.draw.rect(self.internal_screen, btn_color, self.start_button_rect, border_radius=15)
-        pygame.draw.rect(self.internal_screen, (62, 39, 35), self.start_button_rect, width=4, border_radius=15) 
-        
-        txt_surf = self.font.render("START GAME", True, (62, 39, 35))
-        txt_rect = txt_surf.get_rect(center=self.start_button_rect.center)
-        self.internal_screen.blit(txt_surf, txt_rect)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.exit_game()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.start_button_rect.collidepoint(scaled_mouse_pos):
-                    self.tracker.log("Interaction", self.current_level, "Start_Game")
-                    self.game_state = "FARM"
 
     def run_farm_logic(self, dt):
         self.play_music("farm")
@@ -697,18 +677,10 @@ class Game:
                                 self.tracker.log("Interaction", self.current_level, "Shop_Close")
                                 self.show_shop = False
                             elif data["type"] == "buy":
-                                if event.button == 1:
-                                    if self.money >= data["price"]:
-                                        self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
-                                        self.money -= data["price"]
-                                        self.inventory[data["item"]] += 1
-                                        if data["item"] == "cabbage_seed":
-                                            self.tutorial_first_seed_bought = True
-                                elif event.button == 3:
-                                    if self.inventory[data["item"]] > 0:
-                                        self.tracker.log("Interaction", self.current_level, f"Sell_{data['item']}")
-                                        self.inventory[data["item"]] -= 1
-                                        self.money += data["price"]
+                                self.tracker.log("Interaction", self.current_level, f"Buy_{data['item']}")
+                                if self.money >= data["price"]:
+                                    self.money -= data["price"]
+                                    self.inventory[data["item"]] += 1
                 else:
                     if HITBOXES["shop"].collidepoint(pos):
                         self.tracker.log("Interaction", self.current_level, "Shop")
@@ -719,7 +691,7 @@ class Game:
                             self.start_level_minigame(self.current_level, list(current_reqs.keys()))
                     elif HITBOXES["pond"].collidepoint(pos):
                         self.tracker.log("Interaction", self.current_level, "Pond")
-                        if time.time() - self.last_fish_time > 15:
+                        if time.time() - self.last_fish_time > 2:
                             self.inventory["fish"] += 1
                             self.last_fish_time = time.time()
                     elif HITBOXES["cow_pen"].collidepoint(pos):
@@ -727,8 +699,7 @@ class Game:
                         if self.inventory["cow"] > 0 and self.cows_in_pen == 0:
                             self.inventory["cow"] -= 1; self.cows_in_pen += 1
                             self.wandering_cows.append(Animal(HITBOXES["cow_pen"]))
-                            self.cow_placed_time = time.time()
-                        elif self.cows_in_pen > 0 and (time.time() - self.cow_placed_time >= 20):
+                        elif self.cows_in_pen > 0:
                             self.cows_in_pen -= 1; self.inventory["beef"] += 1
                             if self.wandering_cows: self.wandering_cows.pop()
                     else:
@@ -752,12 +723,10 @@ class Game:
             for cow in self.wandering_cows:
                 cow.update(dt)
                 cow.draw(self.internal_screen, self.cow_sprite)
-            if time.time() - self.cow_placed_time >= 20: 
-                self.internal_screen.blit(self.assets["bubble_kill"], (0, 0))
+            self.internal_screen.blit(self.assets["bubble_kill"], (0, 0))
         else: self.internal_screen.blit(self.assets["bubble_cow"], (0, 0))
 
-        if time.time() - self.last_fish_time > 15: 
-            self.internal_screen.blit(self.assets["bubble_fishing"], (0, 0))
+        if time.time() - self.last_fish_time > 2: self.internal_screen.blit(self.assets["bubble_fishing"], (0, 0))
         self.internal_screen.blit(self.assets["inventory_bar"], (0, 0))
         self.internal_screen.blit(self.assets["money"], (0, 0)) 
         
@@ -766,43 +735,35 @@ class Game:
                 self.internal_screen.blit(self.assets[f"icon_{item}"], (0, 0))
                 self.draw_text(self.inventory[item], TEXT_POS[item])
         self.draw_text(self.money, TEXT_POS["money"], color=(90, 50, 20))
-        
         if self.show_shop:
             self.internal_screen.blit(self.assets["shop_window"], (0, 0))
-            
             for key, data in SHOP_ITEMS.items():
                 if data["type"] == "buy":
                     x, y = data["text_pos"]
                     self.draw_text(data["name"], (x, y), color=(120, 80, 50))
                     self.draw_text(f"$ {data['price']}", (x, y + 25), color=(200, 0, 0))
-            
-            self.draw_text("Left: buy", (WIDTH//2 + 45, 480), color=(119, 154, 104))
-            self.draw_text("Right: sell", (WIDTH//2 + 45, 518), color=(119, 154, 104))
-                
-            if self.shop_msg_timer > 0:
-                self.shop_msg_timer -= dt
-                self.draw_text(self.shop_msg, (WIDTH//2, 550), color=(200, 0, 0))
 
     def start_level_minigame(self, level, req_list):
         pygame.mouse.set_visible(False)
         if level == 1:
             recipe = [SlicingStep(4, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 10.0, ["bowl", "soup"], 35, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 10.0, ["bowl", "soup"], 50, req_list, self.tracker)
         elif level == 2:
             recipe = [SlicingStep(5, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(4, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 20.0, ["bowl", "steak"], 50, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 20.0, ["bowl", "steak"], 150, req_list, self.tracker)
         elif level == 3:
             recipe = [BoilingStep(5.0, "potrice"), SlicingStep(6, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(6, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish")]
-            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricefish"], 65, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricefish"], 250, req_list, self.tracker)
         elif level == 4:
             recipe = [BoilingStep(6.0, "potrice"), SlicingStep(6, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(6, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef"), SlicingStep(5, "boardcabbage", "cutcabbage"), BoilingStep(5.0, "potcabbage")]
-            self.minigame = MinigameManager(level, recipe, 35.0, ["bowl", "ricebeef"], 90, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 30.0, ["bowl", "ricebeef"], 350, req_list, self.tracker)
         else: 
             recipe = [SlicingStep(8, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(8, "boardfish", "cutfish"), GrillingStep("rawfish", "cookedfish", "burntfish"), SlicingStep(6, "boardcabbage", "cutcabbage"), BoilingStep(6.0, "potrice"), SlicingStep(8, "rawbeef", "rawbeef"), GrillingStep("rawbeef", "cookedbeef", "burntbeef")]
-            self.minigame = MinigameManager(level, recipe, 40.0, ["bowl", "saucefish"], 200, req_list, self.tracker)
+            self.minigame = MinigameManager(level, recipe, 35.0, ["bowl", "saucefish"], 500, req_list, self.tracker)
         self.game_state = "COOKING"
 
     def run_cooking_logic(self, dt):
+        # NEW LOGIC: Stop music during DISH_REVEAL!
         if self.minigame.state == "PLAYING":
             self.play_music("kitchen")
         elif self.minigame.state == "DISH_REVEAL":
@@ -825,7 +786,7 @@ class Game:
                     for ing in self.minigame.penalty_ingredients: 
                         self.inventory[ing] -= self.level_requirements[self.current_level][ing] 
                     self.money += self.minigame.reward_amount 
-                    self.tracker.save_to_csv()
+                    self.tracker.save_to_csv() # <-- Save AFTER updates
                     
                     if self.current_level < 5:
                         self.current_level += 1 
@@ -841,29 +802,22 @@ class Game:
                             qty_lost = self.level_requirements[self.current_level][ing]
                             self.inventory[ing] -= qty_lost
                             
+                            # --- FIX: LOG EACH LOST INGREDIENT AS WASTE! ---
                             for _ in range(qty_lost):
                                 self.tracker.log("Waste_Event", self.current_level, ing)
                                 
-                    min_cost = 0
-                    for req_item, count in self.level_requirements[self.current_level].items():
-                        if req_item == "cabbage":
-                            min_cost += count * 5
-                        elif req_item == "rice":
-                            min_cost += count * 5
-                        elif req_item == "beef":
-                            min_cost += count * 20
-                            
-                    self.money = min_cost
-                    
+                    self.money = self.level_start_money
                     self.game_state = "FARM"
                     pygame.mouse.set_visible(True)
-                    self.tracker.save_to_csv()
+                    self.tracker.save_to_csv() # <-- Save AFTER updates
         
         self.internal_screen.fill((255, 255, 255))
         scaled_mouse_pos = self.get_scaled_mouse_pos(pygame.mouse.get_pos())
         self.minigame.draw(self.internal_screen, self.font, scaled_mouse_pos)
 
-
+    # ==========================================
+    # FULL REQUIREMENTS DASHBOARD (2x3 Layout)
+    # ==========================================
     def show_dashboard(self):
         root = tk.Tk()
         root.title("Harvest & Haste Dashboard")
@@ -874,6 +828,7 @@ class Game:
         except:
             df = pd.DataFrame()
 
+        # --- APPLY CUTE "ROUNDED" THEME ---
         plt.rcdefaults() 
         plt.rcParams['lines.solid_capstyle'] = 'round'
         plt.rcParams['lines.solid_joinstyle'] = 'round'
@@ -903,7 +858,9 @@ class Game:
                 spine.set_joinstyle('round')
             ax.tick_params(axis='both', colors=P_TEXT_BROWN, labelsize=10, width=2.5, length=6)
 
-
+        # ---------------------------------------------------------
+        # [0, 0] Statistical Table 
+        # ---------------------------------------------------------
         level_results = df[df["EventType"] == "Level_Result"].copy()
         ax = axes[0, 0]
         style_cute_ax(ax, "Level Success Times (Stats)")
@@ -932,7 +889,9 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Success Data", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
 
-
+        # ---------------------------------------------------------
+        # [0, 1] Line Graph 
+        # ---------------------------------------------------------
         ax = axes[0, 1]
         style_cute_ax(ax, "Avg Time to Complete Level")
         if not level_results.empty:
@@ -949,17 +908,21 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Data", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
 
-
+        # ---------------------------------------------------------
+        # [0, 2] Pie Chart
+        # ---------------------------------------------------------
         ax = axes[0, 2]
         style_cute_ax(ax, "Ingredient Waste Ratio")
         waste = df[df["EventType"] == "Waste_Event"].copy()
         
+        # --- FIX: Only keep actual ingredients, filtering out "Pan", "Pot", etc. ---
         valid_ingredients = ['cabbage', 'beef', 'fish', 'rice']
         waste = waste[waste["Item"].str.lower().isin(valid_ingredients)]
         
         if not waste.empty:
             waste_counts = waste["Item"].value_counts()
             
+            # Make the wasted ingredients match their true colors!
             color_map = {
                 'cabbage': P_ARTICHOKE, 
                 'beef': P_SIENNA,       
@@ -979,27 +942,27 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Waste Recorded", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
             
-
+        # ---------------------------------------------------------
+        # [1, 0] Scatter Plot (Heatmap)
+        # ---------------------------------------------------------
         ax = axes[1, 0]
-        style_cute_ax(ax, "Click Distribution (2D Bin)")
+        style_cute_ax(ax, "Player Click Heatmap")
         clicks = df[df["EventType"] == "Click_Position"].copy()
         if not clicks.empty:
             clicks["Value1"] = pd.to_numeric(clicks["Value1"])
             clicks["Value2"] = pd.to_numeric(clicks["Value2"])
             mask = (clicks["Value1"] < 1024) & (clicks["Value2"] < 720)
-            
-            h = ax.hist2d(clicks[mask]["Value1"], clicks[mask]["Value2"], 
-                          bins=[20, 15], range=[[0, 1024], [0, 720]], 
-                          cmap='Oranges')
-            
+            ax.scatter(clicks[mask]["Value1"], clicks[mask]["Value2"], alpha=0.5, c=P_TERRACOTTA, s=30, edgecolor=P_TEXT_BROWN, linewidth=1)
             ax.set_xlim(0, 1024)
-            ax.set_ylim(720, 0)
+            ax.set_ylim(720, 0) 
             ax.set_xlabel("X Coordinate", color=P_TEXT_BROWN, fontweight='bold')
             ax.set_ylabel("Y Coordinate", color=P_TEXT_BROWN, fontweight='bold')
         else:
             ax.text(0.5, 0.5, "No Clicks Recorded", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
 
-
+        # ---------------------------------------------------------
+        # [1, 1] Bar Chart
+        # ---------------------------------------------------------
         ax = axes[1, 1]
         style_cute_ax(ax, "Crop Harvest Yields")
         harvests = df[df["EventType"] == "Harvest"].copy()
@@ -1027,7 +990,9 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Crops Harvested", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
             
-
+        # ---------------------------------------------------------
+        # [1, 2] Box Plot
+        # ---------------------------------------------------------
         ax = axes[1, 2]
         style_cute_ax(ax, "Interaction Frequency Spread")
         interactions = df[df["EventType"] == "Interaction"].copy()
@@ -1064,22 +1029,13 @@ class Game:
         else:
             ax.text(0.5, 0.5, "No Interactions", ha='center', va='center', color=P_TEXT_BROWN, fontweight='bold')
 
-        plt.tight_layout(pad=3.0)
-        fig.subplots_adjust(top=0.90)
+        plt.tight_layout(rect=[0.02, 0.05, 0.98, 0.92], w_pad=2.5, h_pad=2.5)
 
         canvas = FigureCanvasTkAgg(fig, master=root)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        def clean_quit():
-            plt.close('all')
-            root.quit()
-            root.destroy()
-            os._exit(0)
-
-        root.protocol("WM_DELETE_WINDOW", clean_quit)
-
-        btn = tk.Button(root, text="Close & Exit", command=clean_quit, font=("Comic Sans MS", 14, "bold"), bg=P_TAN, fg=P_TEXT_BROWN, relief="ridge", borderwidth=4)
+        btn = tk.Button(root, text="Close & Exit", command=root.destroy, font=("Comic Sans MS", 14, "bold"), bg=P_TAN, fg=P_TEXT_BROWN, relief="ridge", borderwidth=4)
         btn.pack(pady=10)
 
         root.mainloop()
