@@ -2,7 +2,7 @@
 
 ## Project Description
 
-- **Project by:** Paritchaya Thongthep
+- **Project by:** Paritchaya Thongthep & Ratamon Charoenratanakun
 - **Game Genre:** Farming Simulator, Cooking Minigame
 
 Harvest & Haste is a cozy farming + cooking game where you grow crops, raise cows, fish in a pond, and then race to cook dishes under a ticking timer across five increasingly difficult recipes. The game quietly logs everything you do and, when you're done, pops open a dashboard with six charts showing exactly how your session played out from average level times to a heatmap of every single click.
