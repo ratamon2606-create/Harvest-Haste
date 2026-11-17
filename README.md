@@ -34,9 +34,11 @@ Additional charts and analysis are available in the
 
 To clone this project:
 ```sh
-git clone https://github.com/paritchaya-ship-it/Harvest-Haste.git
+git clone https://github.com/ratamon2606-create/Harvest-Haste.git
 cd Harvest-Haste
 ```
+
+Requires Python 3.10+ and a desktop environment (Pygame/Tkinter).
 
 To create and run the Python environment for this project:
 
