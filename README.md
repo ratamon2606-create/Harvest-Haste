@@ -9,6 +9,27 @@ Harvest & Haste is a cozy farming + cooking game where you grow crops, raise cow
 
 ---
 
+## Screenshots
+
+### Gameplay
+
+| Main Menu | Farming |
+|:---:|:---:|
+| ![Main Menu](screenshots/gameplay/start_page.png) | ![Farming](screenshots/gameplay/full_garden.png) |
+
+### Cooking Minigame
+
+![Cooking](screenshots/gameplay/frying.png)
+
+### Gameplay Analytics
+
+![Analytics Dashboard](screenshots/visualization/overall.png)
+
+Additional charts and analysis are available in the
+[Analytics Documentation](screenshots/visualization/VISUALIZATION.md).
+
+---
+
 ## Installation
 
 To clone this project:
